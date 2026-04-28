@@ -18,7 +18,35 @@ export default function App() {
           className="lg:w-240 md:w-220 w-160 rotate-180 lg:-translate-y-50 -translate-y-20 translate-x-30 ml-auto"
         />
       </div>
-      <div className="min-h-screen max-h-auto text-white"></div>
+      <div className="min-h-screen max-h-auto bg-gradient-to-bl from-cyan-900 to-gray-900 text-white">
+        <div className="p-20 space-y-20">
+          <div className="space-y-3">
+            <h2 className="text-4xl font-semibold">What is it?</h2>
+            <p className="text-xl">
+              This ITS aims to be a tool that allows students to visualize the
+              component hierarchy and props of their React applications. It
+              helps students understand the structure of their applications and
+              how components interact with each other.
+            </p>
+          </div>
+          <div className="space-y-3">
+            <h2 className="text-4xl font-semibold">How does it work?</h2>
+            <p className="text-xl">
+              The ITS gives basic instructions to the student such as writing a
+              component, pass props, etc. Sometimes, it may ask the student to
+              identify the component hierarchy or props in the application.
+              Visually, the student will be able to see a tree structure
+              generated as they write their code, which will show the component
+              hierarchy and props. The ITS will also provide feedback and hints
+              to help students understand the concepts better.
+            </p>
+          </div>
+        </div>
+        <div className="min-h-screen max-h-auto bg-gradient-to-bl from-cyan-900 to-gray-900 text-white">
+          <div className="p-20">
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
