@@ -1,6 +1,6 @@
 import { IoCloseSharp } from "react-icons/io5";
 import { useState } from "react";
-import ITS from "../../public/ITS.json";
+import ITS from "../ITS.json";
 
 export default function TutorialContainer({
   setCollapsed,
@@ -28,13 +28,35 @@ export default function TutorialContainer({
         <p className="text-black">{ITS[currentLevel - 1].text}</p>
         {ITS[currentLevel - 1].showInput && (
           <div className="mt-4">
-            <input
-              type="text"
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded"
-              placeholder="Type your answer here..."
-            />
+            {!showCorrectMessage && (
+              <>
+                <input
+                  type="text"
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded"
+                  placeholder="Type your answer here..."
+                />
+                <button
+                  onClick={() => {
+                    if (
+                      answer.trim().toLowerCase() ===
+                      ITS[currentLevel - 1].answer.toLowerCase()
+                    ) {
+                      setShowCorrectMessage(true);
+                      setShowIncorrectMessage(false);
+                      setAnswer("");
+                    } else {
+                      setShowCorrectMessage(false);
+                      setShowIncorrectMessage(true);
+                    }
+                  }}
+                  className="mt-2 w-full hover:cursor-pointer bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+                >
+                  Submit
+                </button>
+              </>
+            )}
             <div className="my-3">
               {showCorrectMessage && (
                 <p className="text-green-500 mt-2">
@@ -47,24 +69,7 @@ export default function TutorialContainer({
                 </p>
               )}
             </div>
-            <button
-              onClick={() => {
-                if (
-                  answer.trim().toLowerCase() ===
-                  ITS[currentLevel - 1].answer.toLowerCase()
-                ) {
-                  setShowCorrectMessage(true);
-                  setShowIncorrectMessage(false);
-                  setAnswer("");
-                } else {
-                  setShowCorrectMessage(false);
-                  setShowIncorrectMessage(true);
-                }
-              }}
-              className="mt-2 w-full hover:cursor-pointer bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-            >
-              Submit
-            </button>
+
             {showCorrectMessage && currentLevel <= ITS.length && (
               <div className="flex justify-end mt-2">
                 <button
