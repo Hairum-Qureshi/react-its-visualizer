@@ -7,7 +7,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import TutorialContainer from "./TutorialContainer";
 
 export default function App() {
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
 
   const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
@@ -26,7 +26,7 @@ export default function App() {
     setReactCode(value);
   }
 
-  const handleEditorDidMount = (editor, monaco: Monaco) => {
+  const handleEditorDidMount = (_editor: typeof Editor, monaco: Monaco) => {
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
       jsx: monaco.languages.typescript.JsxEmit.React,
       target: monaco.languages.typescript.ScriptTarget.Latest,
