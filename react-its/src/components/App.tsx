@@ -209,13 +209,13 @@ export default function App() {
                 >
                   {collapsed ? (
                     <div
-                      className="h-10 w-full bg-gray-200 text-gray-500 text-center p-2"
+                      className="h-10 w-full bg-gray-100 text-gray-500 text-center p-2 border-2 border-gray-300"
                       onClick={() => setCollapsed(false)}
                     >
                       <h3 className="text-center">Tutor Mode</h3>
                     </div>
                   ) : (
-                    <div className="h-1/2 w-full bg-gray-200">
+                    <div className="h-1/2 w-full bg-gray-100 border-t-2 border-t-gray-300">
                       <TutorialContainer setCollapsed={setCollapsed} />
                     </div>
                   )}
