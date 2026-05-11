@@ -3,13 +3,13 @@ import "../css/index.css";
 import reactSVG from "../../public/assets/React.svg";
 import TreeDiagram from "./TreeDiagram";
 import { useState } from "react";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import TutorialContainer from "./TutorialContainer";
+import type { ParsedComponent } from "../types";
+import { parseReactComponents } from "../parser";
+
 
 export default function App() {
   const [collapsed, setCollapsed] = useState(false);
-
-  const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
   const defaultReactCode = `export default function App() { 
       return (
@@ -41,66 +41,13 @@ export default function App() {
     });
   };
 
-  const [result, setResult] = useState("");
-  const [error, setError] = useState("");
-  const [generatingResponse, setGeneratingResponse] = useState(false);
+  const [parsedReactStructure, setParsedReactStructure] = useState<
+    ParsedComponent[]
+  >([]);
 
-  const getResponseForGivenPrompt = async () => {
-    try {
-      const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash-lite",
-      });
-      setGeneratingResponse(true);
-      const result = await model.generateContent(
-        `Given the following React code, create a tree diagram utilizing React Flow syntax of the components and their relationships. DO NOT include any additional information or filler text. The code is: ${reactCode}. Give me the data for the following JSON:
-        {
-          nodes: [
-            { id: "n1", position: { x: 250, y: 50 }, data: { label: "App" } },
-            {
-              id: "n2",
-              position: { x: 400, y: 150 },
-              data: { label: "AuthGuard" },
-            },
-            {
-              id: "n3",
-              position: { x: 100, y: 150 },
-              data: { label: "Navbar" },
-            },
-            {
-              id: "n4",
-              position: { x: 400, y: 250 },
-              data: { label: "Profile" },
-            },
-          ],
-          edges: [
-            { id: "n1-n2", source: "n1", target: "n2" },
-            { id: "n1-n3", source: "n1", target: "n3" },
-            { id: "n2-n4", source: "n2", target: "n4", label: "profileData" },
-          ]
-        }
-        `,
-      );
-      const response = await result.response;
-      const text = await response.text();
-      setResult(text);
-      setGeneratingResponse(false);
-    } catch (error: unknown) {
-      setError(
-        "There was a problem generating the tree diagram. Please try again.",
-      );
-
-      if (error instanceof Error) {
-        console.log("Something Went Wrong:", error.message);
-        setGeneratingResponse(false);
-      } else {
-        console.log("Something Went Wrong");
-        setGeneratingResponse(false);
-      }
-    }
-  };
-
-  async function generateTree() {
-    await getResponseForGivenPrompt();
+  function generateTree() {
+    const parsed = parseReactComponents(reactCode);
+    setParsedReactStructure(parsed);
   }
 
   return (
@@ -180,7 +127,6 @@ export default function App() {
                       hover: { enabled: false }, // Optional: hides the popups on hover
                     }}
                     onChange={handleEditorChange}
-                    readOnly={generatingResponse}
                   />
                 </div>
               </div>
@@ -191,17 +137,7 @@ export default function App() {
                   }
                 >
                   <div className="flex justify-center h-full w-full">
-                    {error ? (
-                      <p className="text-2xl font-semibold text-red-500 flex items-center justify-center w-3/4 text-center">
-                        {error}
-                      </p>
-                    ) : generatingResponse ? (
-                      <p className="text-2xl font-semibold text-gray-500 self-center">
-                        Generating Tree Diagram...
-                      </p>
-                    ) : (
-                      <TreeDiagram treeData={result} />
-                    )}
+                    <TreeDiagram treeData={parsedReactStructure} />
                   </div>
                 </div>
                 <div
