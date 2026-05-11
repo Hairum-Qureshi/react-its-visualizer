@@ -4,9 +4,10 @@ import reactSVG from "../../public/assets/React.svg";
 import TreeDiagram from "./TreeDiagram";
 import { useState } from "react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import TutorialContainer from "./TutorialContainer";
 
 export default function App() {
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
 
   const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
@@ -25,7 +26,7 @@ export default function App() {
     setReactCode(value);
   }
 
-  const handleEditorDidMount = (editor, monaco: Monaco) => {
+  const handleEditorDidMount = (_editor: typeof Editor, monaco: Monaco) => {
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
       jsx: monaco.languages.typescript.JsxEmit.React,
       target: monaco.languages.typescript.ScriptTarget.Latest,
@@ -184,7 +185,11 @@ export default function App() {
                 </div>
               </div>
               <div className="bg-white h-full w-1/2 relative">
-                <div className="h-1/2 w-full">
+                <div
+                  className={
+                    collapsed ? "h-[calc(100%-2.5rem)] w-full" : "h-1/2 w-full"
+                  }
+                >
                   <div className="flex justify-center h-full w-full">
                     {error ? (
                       <p className="text-2xl font-semibold text-red-500 flex items-center justify-center w-3/4 text-center">
@@ -204,17 +209,14 @@ export default function App() {
                 >
                   {collapsed ? (
                     <div
-                      className="h-10 w-full bg-gray-200 text-center p-2"
+                      className="h-10 w-full bg-gray-100 text-gray-500 text-center p-2 border-2 border-gray-300"
                       onClick={() => setCollapsed(false)}
                     >
-                      Tutorial Mode
+                      <h3 className="text-center">Tutor Mode</h3>
                     </div>
                   ) : (
-                    <div
-                      className="h-1/2 w-full bg-gray-200 flex items-center justify-center"
-                      onClick={() => setCollapsed(true)}
-                    >
-                      <h3 className="text-center">Tutor Mode</h3>
+                    <div className="h-1/2 w-full bg-gray-100 border-t-2 border-t-gray-300">
+                      <TutorialContainer setCollapsed={setCollapsed} />
                     </div>
                   )}
                 </div>
