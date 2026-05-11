@@ -1,12 +1,7 @@
 import * as parser from "@babel/parser";
 import { walk } from "estree-walker";
 import type { JSXElement, Node } from "@babel/types";
-
-type ParsedComponent = {
-  id: string;
-  parent: string | null;
-  props: Record<string, string>;
-};
+import type { ParsedComponent } from "./types";
 
 export function parseReactComponents(code: string): ParsedComponent[] {
   const ast = parser.parse(code, {
