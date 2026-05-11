@@ -4,6 +4,7 @@ import reactSVG from "../../public/assets/React.svg";
 import TreeDiagram from "./TreeDiagram";
 import { useState } from "react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import TutorialContainer from "./TutorialContainer";
 
 export default function App() {
   const [collapsed, setCollapsed] = useState(true);
@@ -184,7 +185,11 @@ export default function App() {
                 </div>
               </div>
               <div className="bg-white h-full w-1/2 relative">
-                <div className={collapsed ? "h-[calc(100%-2.5rem)] w-full" : "h-1/2 w-full"}>
+                <div
+                  className={
+                    collapsed ? "h-[calc(100%-2.5rem)] w-full" : "h-1/2 w-full"
+                  }
+                >
                   <div className="flex justify-center h-full w-full">
                     {error ? (
                       <p className="text-2xl font-semibold text-red-500 flex items-center justify-center w-3/4 text-center">
@@ -207,14 +212,11 @@ export default function App() {
                       className="h-10 w-full bg-gray-200 text-gray-500 text-center p-2"
                       onClick={() => setCollapsed(false)}
                     >
-                      Tutorial Mode
+                      <h3 className="text-center">Tutor Mode</h3>
                     </div>
                   ) : (
-                    <div
-                      className="h-1/2 w-full bg-gray-200 flex items-center justify-center"
-                      onClick={() => setCollapsed(true)}
-                    >
-                      <h3 className="text-center text-gray-500">Tutor Mode</h3>
+                    <div className="h-1/2 w-full bg-gray-200">
+                      <TutorialContainer setCollapsed={setCollapsed} />
                     </div>
                   )}
                 </div>
