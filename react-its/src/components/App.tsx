@@ -1,43 +1,31 @@
-import { Editor, type Monaco } from "@monaco-editor/react";
+import {
+  Editor,
+  type Monaco,
+  type MonacoDiffEditor,
+} from "@monaco-editor/react";
 import "../css/index.css";
 import reactSVG from "../../public/assets/React.svg";
-import babelParser from "@babel/parser";
 import TreeDiagram from "./TreeDiagram";
+import { useState } from "react";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export default function App() {
-  const reactAST = babelParser.parse(
-    "export default function App() { return (<AuthGuard><Profile profileData={profileData} /></AuthGuard>); }",
-    {
-      sourceType: "module",
-      plugins: ["jsx", "typescript"],
-    },
-  );
+  const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
-  // 1 - get the opening element that will be the second root node (the first root node is the App component)
-  // 2 - get the name of the opening element and its props (if it has any)
-  // 3 - get the children of the opening element and repeat steps 1-3 for each child until there are no more children
-  const reactASTBody = reactAST.program.body[0]["declaration"].body;
-  const openingElement = reactASTBody.body[0].argument.openingElement.name;
-  const openingElementName = openingElement.name;
-  const openingElementProps =
-    reactASTBody.body[0].argument.openingElement.attributes.map((attr) => ({
-      name: attr.name.name,
-      value: attr.value.expression.name,
-    }));
-  const openingElementChildren = reactASTBody.body[0].argument.children;
+  const defaultReactCode = `export default function App() { 
+      return (
+          <AuthGuard>
+              <Navbar />
+              <Profile profileData={profileData} />
+          </AuthGuard>
+      );
+  }`;
 
-  console.log("Opening element name:", openingElementName);
-  console.log("Opening element props:", openingElementProps);
-  console.log("Opening element children:", openingElementChildren);
+  const [reactCode, setReactCode] = useState(defaultReactCode);
 
-  // reactAST.program.body[0]["declaration"].body.body[0].argument
-  // console.log(
-  //   JSON.stringify(
-  //     reactAST.program.body[0]["declaration"].body.body[0].argument.children,
-  //     null,
-  //     2,
-  //   ),
-  // );
+  function handleEditorChange(value: string) {
+    setReactCode(value);
+  }
 
   const handleEditorDidMount = (editor, monaco: Monaco) => {
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
@@ -53,6 +41,68 @@ export default function App() {
       noSyntaxValidation: true,
     });
   };
+
+  const [result, setResult] = useState("");
+  const [error, setError] = useState("");
+  const [generatingResponse, setGeneratingResponse] = useState(false);
+
+  const getResponseForGivenPrompt = async () => {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash-lite",
+      });
+      setGeneratingResponse(true);
+      const result = await model.generateContent(
+        `Given the following React code, create a tree diagram utilizing React Flow syntax of the components and their relationships. DO NOT include any additional information or filler text. The code is: ${reactCode}. Give me the data for the following JSON:
+        {
+          nodes: [
+            { id: "n1", position: { x: 250, y: 50 }, data: { label: "App" } },
+            {
+              id: "n2",
+              position: { x: 400, y: 150 },
+              data: { label: "AuthGuard" },
+            },
+            {
+              id: "n3",
+              position: { x: 100, y: 150 },
+              data: { label: "Navbar" },
+            },
+            {
+              id: "n4",
+              position: { x: 400, y: 250 },
+              data: { label: "Profile" },
+            },
+          ],
+          edges: [
+            { id: "n1-n2", source: "n1", target: "n2" },
+            { id: "n1-n3", source: "n1", target: "n3" },
+            { id: "n2-n4", source: "n2", target: "n4", label: "profileData" },
+          ]
+        }
+        `,
+      );
+      const response = await result.response;
+      const text = await response.text();
+      setResult(text);
+      setGeneratingResponse(false);
+    } catch (error: unknown) {
+      setError(
+        "There was a problem generating the tree diagram. Please try again.",
+      );
+
+      if (error instanceof Error) {
+        console.log("Something Went Wrong:", error.message);
+        setGeneratingResponse(false);
+      } else {
+        console.log("Something Went Wrong");
+        setGeneratingResponse(false);
+      }
+    }
+  };
+
+  async function generateTree() {
+    await getResponseForGivenPrompt();
+  }
 
   return (
     <div>
@@ -102,6 +152,12 @@ export default function App() {
       <div className="min-h-screen max-h-auto bg-gradient-to-bl from-cyan-900 to-gray-900 text-white">
         <div className="p-20 space-y-10">
           <h3 className="text-4xl font-semibold">Prototype</h3>
+          <button
+            className="border-2 rounded-md border-white p-2"
+            onClick={() => generateTree()}
+          >
+            Generate Tree
+          </button>
           <div className="">
             <div className="w-full h-screen flex">
               <div className="h-full w-1/2">
@@ -124,14 +180,25 @@ export default function App() {
                       minimap: { enabled: false },
                       hover: { enabled: false }, // Optional: hides the popups on hover
                     }}
-                    
+                    onChange={handleEditorChange}
+                    readOnly={generatingResponse}
                   />
                 </div>
               </div>
               <div className="bg-white h-full w-1/2">
                 {/* <div className="h-1/2 w-full"> */}
                 <div className="flex justify-center h-full w-full">
-                  <TreeDiagram />
+                  {error ? (
+                    <p className="text-2xl font-semibold text-red-500 flex items-center justify-center w-3/4 text-center">
+                      {error}
+                    </p>
+                  ) : generatingResponse ? (
+                    <p className="text-2xl font-semibold text-gray-500 self-center">
+                      Generating Tree Diagram...
+                    </p>
+                  ) : (
+                    <TreeDiagram treeData={result} />
+                  )}
                 </div>
                 {/* <div className="h-1/2 w-full"></div> */}
               </div>
