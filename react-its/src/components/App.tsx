@@ -1,8 +1,4 @@
-import {
-  Editor,
-  type Monaco,
-  type MonacoDiffEditor,
-} from "@monaco-editor/react";
+import { Editor, type Monaco } from "@monaco-editor/react";
 import "../css/index.css";
 import reactSVG from "../../public/assets/React.svg";
 import TreeDiagram from "./TreeDiagram";
@@ -10,6 +6,8 @@ import { useState } from "react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export default function App() {
+  const [collapsed, setCollapsed] = useState(true);
+
   const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
   const defaultReactCode = `export default function App() { 
@@ -185,22 +183,41 @@ export default function App() {
                   />
                 </div>
               </div>
-              <div className="bg-white h-full w-1/2">
-                {/* <div className="h-1/2 w-full"> */}
-                <div className="flex justify-center h-full w-full">
-                  {error ? (
-                    <p className="text-2xl font-semibold text-red-500 flex items-center justify-center w-3/4 text-center">
-                      {error}
-                    </p>
-                  ) : generatingResponse ? (
-                    <p className="text-2xl font-semibold text-gray-500 self-center">
-                      Generating Tree Diagram...
-                    </p>
+              <div className="bg-white h-full w-1/2 relative">
+                <div className="h-1/2 w-full">
+                  <div className="flex justify-center h-full w-full">
+                    {error ? (
+                      <p className="text-2xl font-semibold text-red-500 flex items-center justify-center w-3/4 text-center">
+                        {error}
+                      </p>
+                    ) : generatingResponse ? (
+                      <p className="text-2xl font-semibold text-gray-500 self-center">
+                        Generating Tree Diagram...
+                      </p>
+                    ) : (
+                      <TreeDiagram treeData={result} />
+                    )}
+                  </div>
+                </div>
+                <div
+                  className={`${collapsed ? "absolute bottom-0 w-full" : "w-full h-full"}`}
+                >
+                  {collapsed ? (
+                    <div
+                      className="h-10 w-full bg-gray-200 text-center p-2"
+                      onClick={() => setCollapsed(false)}
+                    >
+                      Tutorial Mode
+                    </div>
                   ) : (
-                    <TreeDiagram treeData={result} />
+                    <div
+                      className="h-1/2 w-full bg-gray-200 flex items-center justify-center"
+                      onClick={() => setCollapsed(true)}
+                    >
+                      <h3 className="text-center">Tutor Mode</h3>
+                    </div>
                   )}
                 </div>
-                {/* <div className="h-1/2 w-full"></div> */}
               </div>
             </div>
           </div>
