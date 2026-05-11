@@ -10,17 +10,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@babel/parser": "^7.29.3",
+    "@babel/types": "^7.29.0",
     "@monaco-editor/react": "^4.7.0",
     "@openrouter/sdk": "^0.12.35",
     "@tailwindcss/vite": "^4.2.4",
     "@xyflow/react": "^12.10.2",
+    "estree-walker": "^3.0.3",
     "monaco-editor": "^0.55.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "tailwindcss": "^4.2.4"
   },
   "devDependencies": {
-    "@babel/traverse": "^7.29.0",
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
