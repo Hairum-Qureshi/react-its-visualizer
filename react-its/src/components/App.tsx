@@ -204,7 +204,7 @@ export default function App() {
                 >
                   {collapsed ? (
                     <div
-                      className="h-10 w-full bg-gray-200 text-center p-2"
+                      className="h-10 w-full bg-gray-200 text-gray-500 text-center p-2"
                       onClick={() => setCollapsed(false)}
                     >
                       Tutorial Mode
@@ -214,7 +214,7 @@ export default function App() {
                       className="h-1/2 w-full bg-gray-200 flex items-center justify-center"
                       onClick={() => setCollapsed(true)}
                     >
-                      <h3 className="text-center">Tutor Mode</h3>
+                      <h3 className="text-center text-gray-500">Tutor Mode</h3>
                     </div>
                   )}
                 </div>
