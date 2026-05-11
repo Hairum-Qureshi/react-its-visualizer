@@ -184,7 +184,7 @@ export default function App() {
                 </div>
               </div>
               <div className="bg-white h-full w-1/2 relative">
-                <div className="h-1/2 w-full">
+                <div className={collapsed ? "h-[calc(100%-2.5rem)] w-full" : "h-1/2 w-full"}>
                   <div className="flex justify-center h-full w-full">
                     {error ? (
                       <p className="text-2xl font-semibold text-red-500 flex items-center justify-center w-3/4 text-center">
