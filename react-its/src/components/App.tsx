@@ -7,9 +7,8 @@ import TutorialContainer from "./TutorialContainer";
 import type { ParsedComponent } from "../types";
 import { parseReactComponents } from "../parser";
 
-
 export default function App() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   const defaultReactCode = `export default function App() { 
       return (
@@ -22,11 +21,11 @@ export default function App() {
 
   const [reactCode, setReactCode] = useState(defaultReactCode);
 
-  function handleEditorChange(value: string) {
-    setReactCode(value);
+  function handleEditorChange(value: string | undefined) {
+    if (value) setReactCode(value);
   }
 
-  const handleEditorDidMount = (_editor: typeof Editor, monaco: Monaco) => {
+  const handleEditorDidMount = (_editor: any, monaco: Monaco) => {
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
       jsx: monaco.languages.typescript.JsxEmit.React,
       target: monaco.languages.typescript.ScriptTarget.Latest,
@@ -34,7 +33,6 @@ export default function App() {
       moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
     });
 
-    // This ensures no red squiggly lines appear if types are missing
     monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
       noSemanticValidation: true,
       noSyntaxValidation: true,
@@ -51,112 +49,101 @@ export default function App() {
   }
 
   return (
-    <div>
-      <div className="min-h-screen max-h-auto bg-gradient-to-tl from-cyan-900 to-gray-900">
-        <div className="text-white min-h-screen max-h-screen overflow-hidden">
-          <div className="p-20 space-y-4">
-            <h1 className="text-8xl font-semibold">React ITS</h1>
-            <h3 className="text-4xl">
-              Visualize component hierarchies and props
-            </h3>
-            <p className="text-xl">A prototype by Hairum Qureshi</p>
-          </div>
-          <img
-            src={reactSVG}
-            alt="react logo"
-            className="lg:w-240 md:w-220 w-160 rotate-180 lg:-translate-y-50 -translate-y-20 translate-x-30 ml-auto"
-          />
+    <div className="bg-gradient-to-tl from-cyan-900 to-gray-900">
+      {/* Hero Section */}
+      <div className="min-h-screen max-h-screen overflow-hidden text-white relative">
+        <div className="p-20 space-y-4">
+          <h1 className="text-8xl font-semibold">React ITS</h1>
+          <h3 className="text-4xl">
+            Visualize component hierarchies and props
+          </h3>
+          <p className="text-xl">A prototype by Hairum Qureshi</p>
         </div>
-        <div className="min-h-screen max-h-auto bg-gradient-to-bl from-cyan-900 to-gray-900 text-white">
-          <div className="p-20 space-y-20">
-            <div className="space-y-3">
-              <h2 className="text-4xl font-semibold">What is it?</h2>
-              <p className="text-xl">
-                This ITS aims to be a tool that allows students to visualize the
-                component hierarchy and props of their React applications. It
-                helps students understand the structure of their applications
-                and how components interact with each other.
-              </p>
-            </div>
+        <img
+          src={reactSVG}
+          alt="react logo"
+          className="lg:w-240 md:w-220 w-160 rotate-180 lg:-translate-y-50 -translate-y-20 translate-x-30 ml-auto"
+        />
+      </div>
 
-            <div className="space-y-3">
-              <h2 className="text-4xl font-semibold">How does it work?</h2>
-              <p className="text-xl">
-                The ITS gives basic instructions to the student such as writing
-                a component, pass props, etc. Sometimes, it may ask the student
-                to identify the component hierarchy or props in the application.
-                Visually, the student will be able to see a tree structure
-                generated as they write their code, which will show the
-                component hierarchy and props. The ITS will also provide
-                feedback and hints to help students understand the concepts
-                better.
-              </p>
-            </div>
+      {/* Info Section */}
+      <div className="min-h-screen bg-gradient-to-bl from-cyan-900 to-gray-900 text-white">
+        <div className="p-20 space-y-20">
+          <div className="space-y-3">
+            <h2 className="text-4xl font-semibold">What is it?</h2>
+            <p className="text-xl">
+              This ITS aims to be a tool that allows students to visualize the
+              component hierarchy and props of their React applications.
+            </p>
           </div>
         </div>
       </div>
-      <div className="min-h-screen max-h-auto bg-gradient-to-bl from-cyan-900 to-gray-900 text-white">
-        <div className="p-20 space-y-10">
-          <h3 className="text-4xl font-semibold">Prototype</h3>
-          <button
-            className="border-2 rounded-md border-white p-2"
-            onClick={() => generateTree()}
-          >
-            Generate Tree
-          </button>
-          <div className="">
-            <div className="w-full h-screen flex">
-              <div className="h-full w-1/2">
-                <div className="bg-[#1e1e1e] rounded-md p-4 h-full">
-                  <Editor
-                    height="100%"
-                    path="index.tsx" // Keep this to signal TSX
-                    language="typescript"
-                    theme="vs-dark"
-                    onMount={handleEditorDidMount} // Add this line
-                    defaultValue={`export default function App() { 
-    return (
-        <AuthGuard>
-            <Navbar />
-            <Profile profileData={profileData} />
-        </AuthGuard>
-    );
-}`}
-                    options={{
-                      minimap: { enabled: false },
-                      hover: { enabled: false }, // Optional: hides the popups on hover
-                    }}
-                    onChange={handleEditorChange}
-                  />
-                </div>
-              </div>
-              <div className="bg-white h-full w-1/2 relative">
+
+      {/* Prototype Workspace */}
+      <div className="min-h-screen bg-gradient-to-bl from-cyan-900 to-gray-900 text-white p-20 flex flex-col">
+        <h3 className="text-4xl font-semibold mb-10">Prototype</h3>
+        <button
+          className="border-2 rounded-md border-white p-2 w-fit mb-6 hover:bg-white hover:text-cyan-900 transition-colors"
+          onClick={() => generateTree()}
+        >
+          Generate Tree
+        </button>
+
+        {/* Main Editor/Visualizer Container */}
+        <div className="flex w-full h-[85vh] rounded-md overflow-hidden border border-gray-700 shadow-2xl">
+          {/* Left Side: Code Editor */}
+          <div className="w-1/2 h-full bg-[#1e1e1e] p-4">
+            <Editor
+              height="100%"
+              path="index.tsx"
+              language="typescript"
+              theme="vs-dark"
+              onMount={handleEditorDidMount}
+              defaultValue={defaultReactCode}
+              options={{
+                minimap: { enabled: false },
+                hover: { enabled: false },
+                fontSize: 14,
+              }}
+              onChange={handleEditorChange}
+            />
+          </div>
+
+          {/* Right Side: Tree and Tutorial Container */}
+          <div className="w-1/2 h-full bg-white flex flex-col text-black">
+            {/* Tree Section */}
+            <div
+              className={`w-full h-full overflow-hidden transition-all duration-500 ease-in-out ${
+                collapsed ? "flex-1" : "flex-[1_1_50%]"
+              }`}
+            >
+              <TreeDiagram treeData={parsedReactStructure} />
+            </div>
+
+            {/* Tutorial Section */}
+            <div
+              className={`transition-all duration-500 ease-in-out flex flex-col overflow-hidden border-t border-gray-200 ${
+                collapsed ? "flex-none h-12" : "flex-[1_1_50%]"
+              }`}
+            >
+              {collapsed ? (
+                /* The Collapsed Bar */
                 <div
-                  className={
-                    collapsed ? "h-[calc(100%-2.5rem)] w-full" : "h-1/2 w-full"
-                  }
+                  className="h-full w-full bg-gray-50 text-gray-500 flex items-center justify-center border-t border-gray-300 cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => setCollapsed(false)}
                 >
-                  <div className="flex justify-center h-full w-full">
-                    <TreeDiagram treeData={parsedReactStructure} />
+                  <h3 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                    <span>Expand Tutor Mode</span>
+                    <span className="text-lg">↑</span>
+                  </h3>
+                </div>
+              ) : (
+                <div className="h-full w-full bg-white flex flex-col">
+                  <div className="flex-1 overflow-auto">
+                    <TutorialContainer setCollapsed={setCollapsed} />
                   </div>
                 </div>
-                <div
-                  className={`${collapsed ? "absolute bottom-0 w-full" : "w-full h-full"}`}
-                >
-                  {collapsed ? (
-                    <div
-                      className="h-10 w-full bg-gray-100 text-gray-500 text-center p-2 border-2 border-gray-300"
-                      onClick={() => setCollapsed(false)}
-                    >
-                      <h3 className="text-center">Tutor Mode</h3>
-                    </div>
-                  ) : (
-                    <div className="h-1/2 w-full bg-gray-100 border-t-2 border-t-gray-300">
-                      <TutorialContainer setCollapsed={setCollapsed} />
-                    </div>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
