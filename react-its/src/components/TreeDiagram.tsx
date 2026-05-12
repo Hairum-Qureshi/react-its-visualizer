@@ -1,72 +1,105 @@
-import { useEffect, useState } from "react";
-import { ReactFlow } from "@xyflow/react";
+import { useEffect } from "react";
+import { ReactFlow, useNodesState, useEdgesState } from "@xyflow/react";
+import dagre from "@dagrejs/dagre";
 import "@xyflow/react/dist/style.css";
 import type { ParsedComponent } from "../types";
-
-const defaultNodes = [
-  { id: "n1", position: { x: 250, y: 50 }, data: { label: "App" } },
-  {
-    id: "n2",
-    position: { x: 400, y: 150 },
-    data: { label: "AuthGuard" },
-  },
-  {
-    id: "n3",
-    position: { x: 100, y: 150 },
-    data: { label: "Navbar" },
-  },
-  {
-    id: "n4",
-    position: { x: 400, y: 250 },
-    data: { label: "Profile" },
-  },
-];
-
-const defaultEdges = [
-  { id: "n1-n2", source: "n1", target: "n2" },
-  { id: "n1-n3", source: "n1", target: "n3" },
-  { id: "n2-n4", source: "n2", target: "n4", label: "profileData" },
-];
+import CustomEdgeLabel from "./CustomEdgeLabel";
 
 export default function TreeDiagram({
   treeData,
 }: {
   treeData: ParsedComponent[];
 }) {
-  const [nodes, setNodes] = useState(defaultNodes);
-  const [edges, setEdges] = useState(defaultEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+  // Helper to calculate layout
+  const getLayoutedElements = (nodes: any[], edges: any[]) => {
+    const nodeWidth = 172;
+    const nodeHeight = 36;
+
+    dagreGraph.setGraph({
+      rankdir: "TB",
+      ranksep: 120, // Increase this (default is 50). This pushes rows apart vertically.
+      nodesep: 100, // Increase this (default is 50). This pushes nodes apart horizontally.
+    });
+
+    nodes.forEach((node) => {
+      dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    });
+
+    edges.forEach((edge) => {
+      dagreGraph.setEdge(edge.source, edge.target);
+    });
+
+    dagre.layout(dagreGraph);
+
+    const layoutedNodes = nodes.map((node) => {
+      const nodeWithPosition = dagreGraph.node(node.id);
+      return {
+        ...node,
+        position: {
+          x: nodeWithPosition.x - nodeWidth / 2,
+          y: nodeWithPosition.y - nodeHeight / 2,
+        },
+      };
+    });
+
+    return { nodes: layoutedNodes, edges };
+  };
+
+  const edgeTypes = {
+    custom: CustomEdgeLabel,
+  };
 
   useEffect(() => {
     if (!treeData.length) return;
 
-    let i = 0;
-    const newNodes = treeData.map((comp) => ({
-      id: `n${i++}`,
-      position: { x: Math.random() * 400, y: Math.random() * 400 },
+    // 1. Create raw nodes and edges from treeData
+    const initialNodes = treeData.map((comp) => ({
+      id: comp.id, // Using comp.id directly is safer than indexing
       data: { label: comp.id },
+      position: { x: 0, y: 0 }, // Position is temporary
     }));
-    setNodes(newNodes);
-
-    const newEdges = treeData
+    const initialEdges = treeData
       .filter((comp) => comp.parent)
       .map((comp) => ({
-        id: `e${comp.parent}-${comp.id}`,
-        source: `n${treeData.findIndex((c) => c.id === comp.parent)}`,
-        target: `n${treeData.findIndex((c) => c.id === comp.id)}`,
-        label: Object.keys(comp.props).join(", "),
+        id: `e-${comp.parent}-${comp.id}`,
+        source: comp.parent!,
+        target: comp.id,
+        type: "custom",
+        data: {
+          props: comp.props,
+        },
       }));
-    setEdges(newEdges);
-  }, [treeData]);
+
+    // 2. Apply Dagre Layout
+    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+      initialNodes,
+      initialEdges,
+    );
+
+    setNodes(layoutedNodes);
+    setEdges(layoutedEdges);
+  }, [treeData, setNodes, setEdges]);
 
   return (
-    <ReactFlow
-      key={JSON.stringify(nodes) + JSON.stringify(edges)}
-      nodes={nodes}
-      edges={edges}
-      fitView
-      onNodeClick={(event, node) =>
-        node.data.label === "AuthGuard" && alert("Clicked!")
-      }
-    />
+    <div className="w-full h-full">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        edgeTypes={edgeTypes}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        fitView
+        fitViewOptions={{
+          padding: 0.4, // Increase this number to "zoom out" more (0.1 is default)
+          maxZoom: 0.8, // Prevents the graph from ever becoming "too big"
+        }}
+      />
+    </div>
   );
 }
