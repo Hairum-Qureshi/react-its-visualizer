@@ -15,7 +15,7 @@ export default function TutorialContainer({
   );
 
   return (
-    <div className="text-gray-500 p-3">
+    <div className="h-full overflow-y-auto text-gray-500 p-3">
       <div className="p-1 w-full flex justify-end text-2xl text-black">
         <button
           onClick={() => setCollapsed && setCollapsed(true)}
