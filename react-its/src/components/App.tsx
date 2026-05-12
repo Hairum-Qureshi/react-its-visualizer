@@ -8,7 +8,7 @@ import type { ParsedComponent } from "../types";
 import { parseReactComponents } from "../parser";
 
 export default function App() {
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
 
   const defaultReactCode = `export default function App() { 
       return (
