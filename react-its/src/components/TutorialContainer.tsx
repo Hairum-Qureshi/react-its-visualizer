@@ -1,6 +1,13 @@
 import { IoCloseSharp } from "react-icons/io5";
-import { useState } from "react";
-import ITS from "../ITS.json";
+import { useEffect, useState, useMemo } from "react";
+import ITS_Beginner from "../ITS-Beginner.json";
+import ITS_Intermediate from "../ITS-intermediate.json";
+import ITS_Expert from "../ITS-expert.json";
+import type { ITS } from "../types";
+
+const ITS_BEGINNER_JSON = ITS_Beginner as ITS[];
+const ITS_INTERMEDIATE_JSON = ITS_Intermediate as ITS[];
+const ITS_ADVANCED_JSON = ITS_Expert as ITS[];
 
 export default function TutorialContainer({
   setCollapsed,
@@ -10,80 +17,182 @@ export default function TutorialContainer({
   const [answer, setAnswer] = useState("");
   const [showCorrectMessage, setShowCorrectMessage] = useState(false);
   const [showIncorrectMessage, setShowIncorrectMessage] = useState(false);
-  const [currentLevel, setCurrentLevel] = useState(
-    Number(localStorage.getItem("currentLevel")) || 1,
+  const [scoreTillStreak, setScoreTillStreak] = useState(0);
+  const [numMistakes, setNumMistakes] = useState(0);
+  const streakThreshold = 5;
+
+  const [experience, setExperience] = useState(
+    () => Number(localStorage.getItem("experience")) || 0,
   );
 
+  const ITS_DATA = useMemo(() => {
+    if (experience >= 15 || scoreTillStreak >= 10) return ITS_ADVANCED_JSON;
+    if (experience >= 5 || scoreTillStreak >= 5) return ITS_INTERMEDIATE_JSON;
+    return ITS_BEGINNER_JSON;
+  }, [experience, scoreTillStreak]);
+
+  const totalLevels = ITS_DATA.length;
+
+  const [currentLevel, setCurrentLevel] = useState(
+    () => Number(localStorage.getItem("currentLevel")) || 0,
+  );
+
+  const safeCurrentLevel = Math.min(Math.max(currentLevel, 0), totalLevels - 1);
+  const currentStep = ITS_DATA[safeCurrentLevel];
+
+  useEffect(() => {
+    localStorage.setItem("currentLevel", safeCurrentLevel.toString());
+  }, [safeCurrentLevel]);
+
+  const handleSubmit = () => {
+    if (answer.trim().toLowerCase() === currentStep.answer.toLowerCase()) {
+      setShowCorrectMessage(true);
+      setShowIncorrectMessage(false);
+      setNumMistakes(0); 
+
+      const newExp = experience + 1;
+      setExperience(newExp);
+      localStorage.setItem("experience", newExp.toString());
+
+      setScoreTillStreak((prev) => prev + 1);
+    } else {
+      setShowCorrectMessage(false);
+
+      const nextMistakeCount = numMistakes + 1;
+
+      if (nextMistakeCount >= 2) {
+        setScoreTillStreak(0);
+        setShowIncorrectMessage(false);
+        setNumMistakes(0);
+        setExperience(0);
+        setCurrentLevel(0); 
+        localStorage.setItem("experience", "0");
+        localStorage.setItem("currentLevel", "0");
+      } else {
+        setShowIncorrectMessage(true);
+        setNumMistakes(nextMistakeCount);
+        const newExp = Math.max(0, experience - 1);
+        setExperience(newExp);
+        localStorage.setItem("experience", newExp.toString());
+      }
+    }
+  };
+
+  const handleNext = () => {
+    setShowCorrectMessage(false);
+    setShowIncorrectMessage(false);
+    setAnswer("");
+
+    if (scoreTillStreak >= streakThreshold) {
+      setCurrentLevel(0);
+    }
+    else if (safeCurrentLevel < totalLevels - 1) {
+      setCurrentLevel(safeCurrentLevel + 1);
+    }
+    else {
+      const randomIndex = Math.floor(Math.random() * totalLevels);
+      setCurrentLevel(randomIndex);
+      setScoreTillStreak(0);
+    }
+  };
+
+  if (!currentStep) {
+    return (
+      <div className="h-full flex items-center justify-center text-gray-500 italic">
+        Loading tutorial module...
+      </div>
+    );
+  }
+
   return (
-    <div className="h-full overflow-y-auto text-gray-500 p-3">
-      <div className="p-1 w-full flex justify-end text-2xl text-black">
+    <div className="h-full overflow-y-auto text-gray-500 p-4 bg-white shadow-xl">
+      <div className="p-1 w-full flex justify-between items-start mb-6 border-b border-gray-100 pb-4">
+        <div>
+          <h3 className="text-lg font-bold text-sky-800 leading-tight">
+            Level:{" "}
+            <span className="text-black capitalize">
+              {experience >= 15
+                ? "Expert"
+                : experience >= 5
+                  ? "Intermediate"
+                  : "Beginner"}
+            </span>
+          </h3>
+          <div className="flex gap-3 mt-1 text-xs font-medium uppercase tracking-wider">
+            <span className="text-gray-500">Exp: {experience}</span>
+            <span
+              className={
+                scoreTillStreak > 0 ? "text-orange-500" : "text-gray-400"
+              }
+            >
+              Streak: {scoreTillStreak}/{streakThreshold}
+            </span>
+            {numMistakes > 0 && (
+              <span className="text-red-500">Mistakes: {numMistakes}/2</span>
+            )}
+          </div>
+        </div>
         <button
           onClick={() => setCollapsed && setCollapsed(true)}
-          className="hover:cursor-pointer"
+          className="hover:cursor-pointer text-2xl text-black transition-transform hover:scale-110"
         >
           <IoCloseSharp />
         </button>
       </div>
+
+      {/* Tutorial Question Section */}
       <div className="w-full">
-        <p className="text-black">{ITS[currentLevel - 1].text}</p>
-        {ITS[currentLevel - 1].showInput && (
+        <p className="text-black text-base leading-relaxed mb-8">
+          {currentStep.text}
+        </p>
+
+        {currentStep.showInput && (
           <div className="mt-4">
-            {!showCorrectMessage && (
-              <>
+            {!showCorrectMessage ? (
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <input
                   type="text"
                   value={answer}
+                  autoFocus
+                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                   onChange={(e) => setAnswer(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  placeholder="Type your answer here..."
+                  className="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all"
+                  placeholder="Type your answer..."
                 />
                 <button
-                  onClick={() => {
-                    if (
-                      answer.trim().toLowerCase() ===
-                      ITS[currentLevel - 1].answer.toLowerCase()
-                    ) {
-                      setShowCorrectMessage(true);
-                      setShowIncorrectMessage(false);
-                      setAnswer("");
-                    } else {
-                      setShowCorrectMessage(false);
-                      setShowIncorrectMessage(true);
-                    }
-                  }}
-                  className="mt-2 w-full hover:cursor-pointer bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+                  onClick={handleSubmit}
+                  className="mt-4 w-full cursor-pointer bg-blue-600 text-white font-bold p-3 rounded-xl hover:bg-blue-700 transition-all shadow-lg active:scale-[0.98]"
                 >
-                  Submit
+                  Submit Answer
                 </button>
-              </>
-            )}
-            <div className="my-3">
-              {showCorrectMessage && (
-                <p className="text-green-500 mt-2">
-                  {ITS[currentLevel - 1].correctMessage}
-                </p>
-              )}
-              {showIncorrectMessage && (
-                <p className="text-red-500 mt-2">
-                  {ITS[currentLevel - 1].incorrectMessage}
-                </p>
-              )}
-            </div>
-
-            {showCorrectMessage && currentLevel <= ITS.length && (
-              <div className="flex justify-end mt-2">
+              </div>
+            ) : (
+              <div className="animate-in zoom-in duration-300 space-y-6">
+                <div className="p-5 bg-green-50 border-l-8 border-green-500 rounded-r-xl shadow-sm">
+                  <p className="text-green-800 text-md leading-relaxed">
+                    <span className="font-bold block mb-1">Excellent!</span>
+                    {currentStep.correctMessage}
+                  </p>
+                </div>
                 <button
-                  onClick={() => {
-                    setShowCorrectMessage(false);
-                    setAnswer("");
-                    const nextLevel = currentLevel + 1;
-                    setCurrentLevel(nextLevel);
-                    localStorage.setItem("currentLevel", nextLevel.toString());
-                  }}
-                  className="bg-green-500 text-white px-4 py-2 hover:cursor-pointer rounded hover:bg-green-600"
+                  onClick={handleNext}
+                  className="w-full cursor-pointer bg-green-600 text-white font-black p-4 rounded-xl hover:bg-green-700 transition-all shadow-lg active:scale-95"
                 >
-                  Next
+                  {scoreTillStreak >= streakThreshold
+                    ? "PROMOTE TO NEXT LEVEL"
+                    : "NEXT QUESTION"}
                 </button>
+              </div>
+            )}
+
+            {showIncorrectMessage && !showCorrectMessage && (
+              <div className="mt-6 p-5 bg-red-50 border-l-8 border-red-500 rounded-r-xl animate-in shake duration-300">
+                <p className="text-red-800 text-md">
+                  <span className="font-bold block mb-1">
+                    Not quite!
+                  </span>
+                  {currentStep.incorrectMessage}
+                </p>
               </div>
             )}
           </div>
