@@ -7,7 +7,7 @@ import TutorialContainer from "./TutorialContainer";
 import type { ParsedComponent } from "../types";
 import { parseReactComponents } from "../parser";
 
-export default function App() {
+export default function App() {  
   const [collapsed, setCollapsed] = useState(false);
 
   const defaultReactCode = `export default function App() { 
@@ -18,6 +18,8 @@ export default function App() {
           </AuthGuard>
       );
   }`;
+
+    // TODO - need to handle case if the student as invalid/incomplete React code which breaks the parser
 
   const [reactCode, setReactCode] = useState(defaultReactCode);
 
