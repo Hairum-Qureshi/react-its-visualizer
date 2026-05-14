@@ -25,8 +25,6 @@ export default function App() {
     localStorage.setItem("experience", "0");
   }, []);
 
-  // TODO - need to handle case if the student as invalid/incomplete React code which breaks the parser
-
   const [reactCode, setReactCode] = useState(defaultReactCode);
 
   function handleEditorChange(value: string | undefined) {
@@ -80,8 +78,21 @@ export default function App() {
           <div className="space-y-3">
             <h2 className="text-4xl font-semibold">What is it?</h2>
             <p className="text-xl">
-              This ITS aims to be a tool that allows students to visualize the
-              component hierarchy and props of their React applications.
+              This ITS (Intelligent Tutoring System) is designed to help
+              learners understand the flow of data in React applications. By
+              visualizing component hierarchies and prop connections, it
+              provides an interactive way to grasp how components communicate
+              and manage state.
+            </p>
+          </div>
+          <div className="space-y-3">
+            <h2 className="text-4xl font-semibold">How does it work?</h2>
+            <p className="text-xl">
+              The system parses your React code to generate a visual tree
+              diagram of components. It then guides you through a series of
+              questions and challenges based on the structure of your code,
+              helping you learn key concepts like prop drilling, component
+              reusability, and state management.
             </p>
           </div>
         </div>
