@@ -1,7 +1,19 @@
 type ParsedComponent = {
+  name: string;
   id: string;
   parent: string | null;
   props: Record<string, string>;
 };
 
-export type { ParsedComponent };
+type ITS = {
+  id: string;
+  text: string;
+  answer: string;
+  correctMessage: string;
+  incorrectCodeMessage?: string;
+  incorrectMessage: string;
+  showInput: boolean;
+  expectedWrittenCode?: string;
+};
+
+export type { ParsedComponent, ITS };

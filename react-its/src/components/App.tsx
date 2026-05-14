@@ -2,12 +2,12 @@ import { Editor, type Monaco } from "@monaco-editor/react";
 import "../css/index.css";
 import reactSVG from "../../public/assets/React.svg";
 import TreeDiagram from "./TreeDiagram";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TutorialContainer from "./TutorialContainer";
 import type { ParsedComponent } from "../types";
 import { parseReactComponents } from "../parser";
 
-export default function App() {  
+export default function App() {
   const [collapsed, setCollapsed] = useState(false);
 
   const defaultReactCode = `export default function App() { 
@@ -19,7 +19,13 @@ export default function App() {
       );
   }`;
 
-    // TODO - need to handle case if the student as invalid/incomplete React code which breaks the parser
+  useEffect(() => {
+    generateTree();
+    localStorage.removeItem("currentLevel");
+    localStorage.setItem("experience", "0");
+  }, []);
+
+  // TODO - need to handle case if the student as invalid/incomplete React code which breaks the parser
 
   const [reactCode, setReactCode] = useState(defaultReactCode);
 

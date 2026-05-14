@@ -1,0 +1,82 @@
+[
+  {
+    "id": "1",
+    "text": "A 'prop' is like a package being delivered from a parent component to a child. In React, these are the attributes you see inside a component's tag. Look at the <Profile /> tag in the code. What is the name of the 'package' (prop) being passed to it?",
+    "showInput": true,
+    "answer": "profileData",
+    "incorrectMessage": "Not quite. Look for the text immediately to the left of the equals sign (=) inside the Profile tag. That's the prop's name!",
+    "correctMessage": "That's right! The prop is called 'profileData'. Just like a function argument, it allows the parent to share specific information with the child."
+  },
+  {
+    "id": "2",
+    "text": "Great! Now, if 'profileData' is the package, which component is the 'recipient' actually opening and using that package?",
+    "showInput": true,
+    "answer": "Profile",
+    "incorrectMessage": "Look at the tag where the prop is defined. The name of the tag tells you which component is receiving that data.",
+    "correctMessage": "Exactly! The Profile component receives the prop. It can now use that data to decide what to show on the screen."
+  },
+  {
+    "id": "3",
+    "text": "In React, props always flow 'downhill' from a sender to a recipient. Looking at the code, which component is the 'sender' responsible for passing that profileData down to the Profile component?",
+    "showInput": true,
+    "answer": "App",
+    "incorrectMessage": "Close! Look at which component's 'return' statement contains the <Profile /> tag. That outer component is the sender.",
+    "correctMessage": "Nice work! App is the 'Parent' sender. This demonstrates 'One-Way Data Flow': data moves from App down to its children, never the other way around automatically."
+  },
+  {
+    "id": "4",
+    "text": "Here's a tricky one: Props are 'read-only' (immutable) for the child. If the Profile component wanted to change its own 'profileData' and send it back up to App, can it do that using props alone? (Yes/No)",
+    "showInput": true,
+    "answer": "no",
+    "incorrectMessage": "Remember the rules: props are like a one-way street. A child can look at the package it received, but it can't send a package back up the same way.",
+    "correctMessage": "Right! Props are immutable for the child. To send info 'up', a parent must pass a special 'callback function' as a prop for the child to call."
+  },
+  {
+    "id": "5",
+    "text": "Imagine we update the code to: <Profile profileData={profileData} theme='dark' />. How many total 'packages' (props) is Profile receiving now?",
+    "showInput": true,
+    "answer": "2",
+    "incorrectMessage": "Count the labels before the equals signs. Each unique name={value} pair is an individual prop.",
+    "correctMessage": "Spot on. It now receives two: 'profileData' and 'theme'. You're getting the hang of how data scales!"
+  },
+  {
+    "id": "6",
+    "text": "We've talked about props being 'packages.' In React, we also have 'State,' which is data managed *inside* a component. If a component wants to change its own data, should it use props or state?",
+    "showInput": true,
+    "answer": "state",
+    "incorrectMessage": "Think back: props are 'read-only' and come from the parent. If a component needs to change its own internal data, it needs its own state!",
+    "correctMessage": "Spot on! State is for internal, mutable data. Props are for external, handed-down data. Distinguishing the two is a major React milestone."
+  },
+  {
+    "id": "7",
+    "text": "True or False: A child component can directly 'rename' or 'reassign' a prop it received from its parent.",
+    "showInput": true,
+    "answer": "false",
+    "incorrectMessage": "Remember the rule of Immutability: Props are read-only. The child can use them, but it cannot change them!",
+    "correctMessage": "Correct! This is a core part of React's design. Props are immutable for the child; only the parent who 'owns' the data can change it."
+  },
+  {
+    "id": "8",
+    "text": "Look at the Navbar component in the code. Does it currently have any props being passed to it? (Yes/No)",
+    "showInput": true,
+    "answer": "no",
+    "incorrectMessage": "Check the <Navbar /> tag. Do you see any name={value} pairs inside it like you do for the Profile component?",
+    "correctMessage": "Exactly. Navbar is currently a 'Stateless' component that doesn't receive any data. Not every component needs props to function!"
+  },
+  {
+    "id": "9",
+    "text": "If we wanted the Navbar to display the user's name, where would that 'name' prop likely come from: the Navbar itself or its parent (App)?",
+    "showInput": true,
+    "answer": "App",
+    "incorrectMessage": "Think about the delivery analogy. If a component needs a 'package' of data from the outside, who has to send it?",
+    "correctMessage": "Right again! The parent (App) would provide the data as a prop. The child (Navbar) just receives and displays it."
+  },
+  {
+    "id": "10",
+    "text": "In the code <Profile profileData={profileData} />, the part inside the curly braces `{profileData}` represents the actual data value. What is the name of the prop itself?",
+    "showInput": true,
+    "answer": "profileData",
+    "incorrectMessage": "In name={value}, the name is on the left. In this specific case, they happen to share the same name!",
+    "correctMessage": "Perfect. You can distinguish between the prop 'name' and the data 'value'. You are ready to move on to visualizing these relationships in a Tree Diagram!"
+  }
+]

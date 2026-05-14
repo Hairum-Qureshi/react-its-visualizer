@@ -1,6 +1,6 @@
 import * as parser from "@babel/parser";
 import { walk } from "estree-walker";
-import type { JSXElement, Node } from "@babel/types";
+import type { JSXElement } from "@babel/types";
 import type { ParsedComponent } from "./types";
 
 export function parseReactComponents(code: string): ParsedComponent[] {
@@ -10,6 +10,49 @@ export function parseReactComponents(code: string): ParsedComponent[] {
   });
 
   const components: ParsedComponent[] = [];
+  const instanceCountByName: Record<string, number> = {};
+  const functionStack: string[] = [];
+  let topLevelComponentId: string | null = null;
+
+  const programBody = (ast as any).program?.body ?? [];
+  let topLevelComponentName: string | null = null;
+
+  for (const statement of programBody) {
+    if (statement.type !== "ExportDefaultDeclaration") {
+      continue;
+    }
+
+    const declaration = statement.declaration;
+
+    if (declaration?.type === "FunctionDeclaration" && declaration.id?.name) {
+      topLevelComponentName = declaration.id.name;
+      break;
+    }
+
+    if (declaration?.type === "Identifier") {
+      topLevelComponentName = declaration.name;
+      break;
+    }
+  }
+
+  function createComponent(
+    name: string,
+    parent: string | null,
+    props: Record<string, string>,
+  ): string {
+    const nextInstanceCount = (instanceCountByName[name] ?? 0) + 1;
+    instanceCountByName[name] = nextInstanceCount;
+    const instanceId = `${name}-${nextInstanceCount}`;
+
+    components.push({
+      name,
+      id: instanceId,
+      parent,
+      props,
+    });
+
+    return instanceId;
+  }
 
   function extractJSX(node: JSXElement, parent: string | null = null): void {
     const opening = node.openingElement;
@@ -54,27 +97,76 @@ export function parseReactComponents(code: string): ParsedComponent[] {
       }
     }
 
-    components.push({
-      id: name,
-      parent,
-      props,
-    });
+    const instanceId = createComponent(name, parent, props);
 
     for (const child of node.children) {
       if (child.type === "JSXElement") {
-        extractJSX(child, name);
+        extractJSX(child, instanceId);
       }
     }
   }
 
-  walk(ast, {
-    enter(node: Node) {
+  walk(ast as any, {
+    enter(node: any, parent: any) {
+      if (node.type === "FunctionDeclaration") {
+        functionStack.push(node.id?.name ?? "");
+      }
+
+      if (
+        (node.type === "FunctionExpression" ||
+          node.type === "ArrowFunctionExpression") &&
+        parent?.type === "VariableDeclarator" &&
+        parent.id?.type === "Identifier"
+      ) {
+        functionStack.push(parent.id.name);
+      }
+
       if (
         node.type === "ReturnStatement" &&
         node.argument &&
         node.argument.type === "JSXElement"
       ) {
-        extractJSX(node.argument);
+        const currentFunction = functionStack[functionStack.length - 1] ?? null;
+
+        if (!currentFunction) {
+          return;
+        }
+
+        if (
+          topLevelComponentName &&
+          currentFunction !== topLevelComponentName
+        ) {
+          return;
+        }
+
+        let jsxParentId: string | null = null;
+
+        if (topLevelComponentName) {
+          if (!topLevelComponentId) {
+            topLevelComponentId = createComponent(
+              topLevelComponentName,
+              null,
+              {},
+            );
+          }
+          jsxParentId = topLevelComponentId;
+        }
+
+        extractJSX(node.argument, jsxParentId);
+      }
+    },
+    leave(node: any, parent: any) {
+      if (node.type === "FunctionDeclaration") {
+        functionStack.pop();
+      }
+
+      if (
+        (node.type === "FunctionExpression" ||
+          node.type === "ArrowFunctionExpression") &&
+        parent?.type === "VariableDeclarator" &&
+        parent.id?.type === "Identifier"
+      ) {
+        functionStack.pop();
       }
     },
   });
