@@ -21,6 +21,7 @@ export default function App() {
 
   useEffect(() => {
     generateTree();
+    localStorage.clear();
   }, []);
 
   // TODO - need to handle case if the student as invalid/incomplete React code which breaks the parser
