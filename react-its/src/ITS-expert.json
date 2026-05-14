@@ -1,66 +1,58 @@
 [
   {
     "id": "1",
-    "text": "Welcome to the Expert level. Let's analyze the architecture. Currently, 'profileData' passes from App through AuthGuard to reach Profile, even though AuthGuard doesn't use the data. What is the technical term for this pattern?",
+    "text": "Welcome to the expert level. We currently have 'prop drilling' where AuthGuard passes profileData down without using it. If we wanted to make Profile 'Reusable' and independent, should it manage its own state or continue receiving props?",
     "showInput": true,
-    "answer": "prop drilling",
-    "incorrectMessage": "Think about a drill going through multiple layers of a floor to reach the basement. What do we call it when data 'drills' through components that don't need it?",
-    "correctMessage": "Correct! This is 'Prop Drilling'. While acceptable in small trees, it can make code harder to maintain as the application grows."
+    "answer": "props",
+    "incorrectMessage": "Think about reusability. A component that manages its own specific data is hard to reuse elsewhere. Components that receive what they need via props are more flexible!",
+    "correctMessage": "Exactly. Keeping a component 'Stateless' and driven by props makes it much easier to reuse in different parts of your app."
   },
   {
     "id": "2",
-    "text": "In our current design, App manages the 'profileData' state. If we wanted to avoid prop drilling through AuthGuard, we could use a React feature that provides a 'teleportation' link for data. What is this feature called?",
+    "text": "Let's modify the structure! We need a new component called 'Settings' that also needs 'profileData'. If we want Settings to be a sibling of Profile, which existing component should wrap both of them?",
     "showInput": true,
-    "answer": "context",
-    "incorrectMessage": "It's often used with a 'Provider' and a 'Consumer' (or the useContext hook). It allows data to bypass intermediate components.",
-    "correctMessage": "Exactly. The Context API (or libraries like Redux) allows you to share data globally without passing it through every intermediate level."
+    "answer": "AuthGuard",
+    "incorrectMessage": "Look at the tree. To make two components siblings, they must share the same direct parent. Who is currently wrapping Profile?",
+    "correctMessage": "Perfect. Placing Settings inside AuthGuard makes it a sibling to Profile, allowing them to potentially share the same data source."
   },
   {
     "id": "3",
-    "text": "Look at the 'Navbar' and 'Profile' components. They are siblings. If Navbar needs to trigger a refresh of the 'profileData' inside Profile, where must the 'refresh' function be defined?",
+    "text": "Design Task: You need to create a 'UserStatus' component that displays a message but doesn't change any data. Based on our Expert Model, is this a 'Stateful' or 'Stateless' component?",
     "showInput": true,
-    "answer": "App",
-    "incorrectMessage": "Siblings cannot communicate directly. You must 'Lift State Up' to their closest common ancestor. Who is that in our diagram?",
-    "correctMessage": "Correct. You would define the function in App and pass it down. This is 'Lifting State Up' to ensure a single source of truth."
+    "answer": "stateless",
+    "incorrectMessage": "If a component only displays information and doesn't manage internal changes, it doesn't need its own state!",
+    "correctMessage": "Correct! It is a Stateless (or Presentational) component. This keeps your data logic centralized in the parent."
   },
   {
     "id": "4",
-    "text": "Expert Challenge: If we wrap 'AuthGuard' in React.memo(), but the 'profileData' prop in App changes, will the 'Profile' component still re-render? (Yes/No)",
+    "text": "Hierarchy Challenge: If we want to move the 'Navbar' into 'AuthGuard' so it only shows up for logged-in users, we are changing the component ___________.",
     "showInput": true,
-    "answer": "yes",
-    "incorrectMessage": "Think about the data flow. React.memo prevents re-renders if *props* don't change, but 'profileData' is a prop being passed through to the child.",
-    "correctMessage": "Correct. Since the props being passed through are changing, the child will still re-render to reflect the new data."
+    "answer": "hierarchy",
+    "incorrectMessage": "When we change which components wrap others, we are modifying the structural 'family tree' of the app.",
+    "correctMessage": "Yes! You are modifying the hierarchy. Visualizing this change in the Tree Diagram helps prevent bugs in data flow."
   },
   {
     "id": "5",
-    "text": "Suppose we want to make 'Profile' a 'Reusable Component.' Should we hardcode the 'profileData' logic inside Profile, or should it remain a 'Stateless' component that only receives data via props?",
+    "text": "One-way data flow means children can't talk 'up' easily. To let Profile tell App to log out, the App must pass a ___________ function down as a prop.",
     "showInput": true,
-    "answer": "stateless",
-    "incorrectMessage": "Reusable components are usually 'dumb'. They don't know where data comes from; they just display what they are given.",
-    "correctMessage": "Precisely. Keeping components stateless (or 'presentational') makes them highly reusable across different parts of your application."
+    "answer": "callback",
+    "incorrectMessage": "Think about it: the Parent sends a 'tool' (a function) in a package (props) that the child can 'call' when something happens.",
+    "correctMessage": "Precisely. Passing callback functions as props is the standard way to enable child-to-parent communication indirectly."
   },
   {
     "id": "6",
-    "text": "If you move the 'profileData' state from App into Profile, can AuthGuard still access that data? (Yes/No)",
+    "text": "Look at the diagram. If we 'Lift State Up' from Profile to App, we are moving the state to a ___________ ancestor.",
     "showInput": true,
-    "answer": "no",
-    "incorrectMessage": "Remember the 'One-Way Data Flow.' Data can only flow down to children, not up to parents or sideways to siblings.",
-    "correctMessage": "Right. Moving state down 'encapsulates' it, making it invisible to parents. This is great for performance but bad if the parent needs that data!"
+    "answer": "common",
+    "incorrectMessage": "We move state to the 'Common Ancestor' so that multiple branches of the tree can access the same information.",
+    "correctMessage": "Spot on. Determining where state should live often means finding the closest common ancestor for all components that need that data."
   },
   {
     "id": "7",
-    "text": "When a component becomes too 'Tightly Coupled' to its parent's data structure, it becomes hard to move. What design pattern involves passing components as props (like {children}) to keep them decoupled?",
+    "text": "If you create a component that takes a prop called 'onUpdate', what is the most likely data type for that prop: a String or a Function?",
     "showInput": true,
-    "answer": "composition",
-    "incorrectMessage": "This involves 'composing' components together. AuthGuard uses this when it renders {children} inside its tags.",
-    "correctMessage": "Excellent. Component Composition is a powerful way to avoid prop drilling and keep your hierarchy flexible."
-  },
-  {
-    "id": "8",
-    "text": "Final Mastery Question: Does passing a new object literal like 'user={{id: 1}}' as a prop cause the child to re-render every time the parent renders? (Yes/No)",
-    "showInput": true,
-    "answer": "yes",
-    "incorrectMessage": "In JavaScript, {} !== {}. Every time the parent renders, a 'new' object is created in memory, which React sees as a prop change.",
-    "correctMessage": "Masterful! Because of referential equality, new objects trigger re-renders. This is an advanced performance consideration in React development."
+    "answer": "function",
+    "incorrectMessage": "Props starting with 'on' (like onClick or onUpdate) are almost always functions used for callbacks!",
+    "correctMessage": "Exactly. You've mastered the design patterns! You can now identify when to use props, how to design hierarchy, and how to trace data flow."
   }
 ]
