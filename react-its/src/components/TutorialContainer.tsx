@@ -14,7 +14,6 @@ export default function TutorialContainer({
 }: {
   setCollapsed?: (collapsed: boolean) => void;
 }) {
-  // --- State & Mastery Logic ---
   const [answer, setAnswer] = useState("");
   const [showCorrectMessage, setShowCorrectMessage] = useState(false);
   const [showIncorrectMessage, setShowIncorrectMessage] = useState(false);
@@ -28,7 +27,6 @@ export default function TutorialContainer({
     () => Number(localStorage.getItem("experience")) || 0,
   );
 
-  // Domain Model: Selects the appropriate knowledge set based on XP or current Streak
   const ITS_DATA = useMemo(() => {
     if (experience >= 10 || scoreTillStreak >= 10) return ITS_ADVANCED_JSON;
     if (experience >= 5 || scoreTillStreak >= 5) return ITS_INTERMEDIATE_JSON;
@@ -49,7 +47,6 @@ export default function TutorialContainer({
     localStorage.setItem("currentLevel", safeCurrentLevel.toString());
   }, [safeCurrentLevel]);
 
-  // --- Action Handlers ---
 
   const handleSubmit = () => {
     if (answer.trim().toLowerCase() === currentStep.answer.toLowerCase()) {
@@ -99,19 +96,17 @@ export default function TutorialContainer({
         setScoreTillStreak(0); // Reset streak for the next module
       }
     }
-    // Normal linear progression
     else if (safeCurrentLevel < totalLevels - 1) {
       setCurrentLevel(safeCurrentLevel + 1);
     }
-    // Fallback: Loop back if end reached without mastery
     else {
       const randomIndex = Math.floor(Math.random() * totalLevels);
       setCurrentLevel(randomIndex);
       setScoreTillStreak(0);
     }
   };
+  // Had help from ChatGPT for polishing the ITS logic for progression, demotion, and completion handling. The core structure and design of the ITS was my own work.
 
-  // --- Final Mastery View ---
   if (isFinished) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-center p-6 bg-gradient-to-b from-white to-sky-50 animate-in fade-in duration-700">
@@ -152,7 +147,6 @@ export default function TutorialContainer({
   // --- Standard Tutorial View ---
   return (
     <div className="h-full overflow-y-auto text-gray-500 p-4 bg-white shadow-xl">
-      {/* Header with Mastery Metadata */}
       <div className="p-1 w-full flex justify-between items-start mb-6 border-b border-gray-100 pb-4">
         <div>
           <h3 className="text-lg font-bold text-sky-800 leading-tight">
@@ -187,8 +181,6 @@ export default function TutorialContainer({
           <IoCloseSharp />
         </button>
       </div>
-
-      {/* Main Instruction Area */}
       <div className="w-full">
         <p className="text-black text-base leading-relaxed mb-8">
           {currentStep.text}
