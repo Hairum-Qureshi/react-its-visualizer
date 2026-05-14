@@ -11,7 +11,7 @@ type ITS = {
   answer: string;
   correctMessage: string;
   incorrectMessage: string;
-  showInput: boolean; 
+  showInput: boolean;
 };
 
 export type { ParsedComponent, ITS };

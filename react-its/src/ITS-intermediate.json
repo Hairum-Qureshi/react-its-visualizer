@@ -1,0 +1,66 @@
+[
+  {
+    "id": "1",
+    "text": "Welcome to the Intermediate level! Let's use the 'Generate Tree' button to see our current structure. Looking at the diagram, which component is the 'Root' node that holds the entire rendered subtree?",
+    "showInput": true,
+    "answer": "AuthGuard",
+    "incorrectMessage": "Look at the very top of the tree diagram. While 'App' is the main component, the diagram shows the specific subtree returned by our JSX. Who is at the top?",
+    "correctMessage": "Great start! AuthGuard is the root of this visualized tree. In React, the 'Root' is the topmost component that wraps all other children in a specific branch."
+  },
+  {
+    "id": "2",
+    "text": "Now, let's trace a prop path. Look at the edge (the line) connecting AuthGuard to Profile in the diagram. Does the diagram show a prop being passed between them? If so, what is its name?",
+    "showInput": true,
+    "answer": "profileData",
+    "incorrectMessage": "Check the line connecting AuthGuard and Profile. In our ITS, labels on these lines represent the props flowing through that connection.",
+    "correctMessage": "Correct! The diagram labels the connection with 'profileData'. Visualizing edges helps you quickly see which components are sharing data."
+  },
+  {
+    "id": "3",
+    "text": "Identify a 'Sibling' relationship: In the diagram, Navbar and AuthGuard both branch directly out from App. What does this make them in relation to each other?",
+    "showInput": true,
+    "answer": "siblings",
+    "incorrectMessage": "If two components share the same direct parent (App), they are considered ________.",
+    "correctMessage": "Spot on. They are siblings. This means they are at the same level of the hierarchy, but they cannot pass props directly to each other."
+  },
+  {
+    "id": "4",
+    "text": "React uses 'One-Way Data Flow.' Based on the diagram, if we wanted to get data from App to Profile, which intermediate component must the data pass through first?",
+    "showInput": true,
+    "answer": "AuthGuard",
+    "incorrectMessage": "Follow the lines in the tree from App down to Profile. There is one component standing in the middle. What is it?",
+    "correctMessage": "Exactly. The data must pass through AuthGuard. This is often called 'Prop Drilling' when the middle component doesn't use the data but must pass it anyway."
+  },
+  {
+    "id": "5",
+    "text": "Let's talk about 'Re-rendering.' In React, when a parent re-renders, its children usually do too. If the state in 'App' changes, will the Navbar re-render? (Yes/No)",
+    "showInput": true,
+    "answer": "yes",
+    "incorrectMessage": "Remember: updates propagate downward. Since Navbar is a child of App, it sits directly in the path of that update.",
+    "correctMessage": "Right! Because Navbar is a child of App, it will re-render when App's state changes. This is how React ensures the UI stays in sync with the data."
+  },
+  {
+    "id": "6",
+    "text": "Look at the diagram again. Is there any direct line (edge) connecting Navbar to Profile? (Yes/No)",
+    "showInput": true,
+    "answer": "no",
+    "incorrectMessage": "Check the diagram carefully. Can you go from Navbar to Profile without going back up to a parent component?",
+    "correctMessage": "Correct. There is no direct link. In React, siblings cannot talk to each other directly; they must communicate through their shared parent."
+  },
+  {
+    "id": "7",
+    "text": "If Navbar needs a piece of data that Profile currently has, the 'Expert' move is to 'Lift State Up.' Where should that data be moved so both components can access it?",
+    "showInput": true,
+    "answer": "App",
+    "incorrectMessage": "To share data between siblings, you must move the state to their closest common parent. Who is the parent of both Navbar and AuthGuard?",
+    "correctMessage": "Excellent! Lifting state to 'App' allows it to pass the data down to both branches of the tree. This is a fundamental React pattern."
+  },
+  {
+    "id": "8",
+    "text": "Looking at the tree, if we removed AuthGuard but kept its children, would Profile still have a parent? (Yes/No)",
+    "showInput": true,
+    "answer": "yes",
+    "incorrectMessage": "Think about the hierarchy. If AuthGuard disappears, its children (Profile and Navbar) would technically move up to become direct children of App.",
+    "correctMessage": "Correct! The parent would simply change to App. Hierarchy is dynamic, and the Tree Diagram helps you visualize those structural shifts!"
+  }
+]
