@@ -12,6 +12,7 @@ type ITS = {
   correctMessage: string;
   incorrectMessage: string;
   showInput: boolean;
+  expectedWrittenCode?: string;
 };
 
 export type { ParsedComponent, ITS };
