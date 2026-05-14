@@ -9,7 +9,7 @@
   },
   {
     "id": "2",
-    "text": "Now, let's trace a prop path. Look at the edge (the line) connecting AuthGuard to Profile in the diagram. Does the diagram show a prop being passed between them? If so, what is its name?",
+    "text": "Look at the connection between AuthGuard and Profile. In our hierarchy, AuthGuard wraps Profile and passes data down to it. Based on the label on the line, what is the name of the prop flowing into Profile?",
     "showInput": true,
     "answer": "profileData",
     "incorrectMessage": "Check the line connecting AuthGuard and Profile. In our ITS, labels on these lines represent the props flowing through that connection.",

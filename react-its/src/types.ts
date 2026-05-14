@@ -10,10 +10,8 @@ type ITS = {
   text: string;
   answer: string;
   correctMessage: string;
-  incorrectCodeMessage?: string;
   incorrectMessage: string;
-  showInput: boolean;
-  expectedWrittenCode?: string;
+  showInput: boolean; 
 };
 
 export type { ParsedComponent, ITS };
