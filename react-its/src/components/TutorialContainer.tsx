@@ -14,19 +14,23 @@ export default function TutorialContainer({
 }: {
   setCollapsed?: (collapsed: boolean) => void;
 }) {
+  // --- State & Mastery Logic ---
   const [answer, setAnswer] = useState("");
   const [showCorrectMessage, setShowCorrectMessage] = useState(false);
   const [showIncorrectMessage, setShowIncorrectMessage] = useState(false);
   const [scoreTillStreak, setScoreTillStreak] = useState(0);
   const [numMistakes, setNumMistakes] = useState(0);
+  const [isFinished, setIsFinished] = useState(false);
   const streakThreshold = 5;
 
+  // Retrieve persistent experience
   const [experience, setExperience] = useState(
     () => Number(localStorage.getItem("experience")) || 0,
   );
 
+  // Domain Model: Selects the appropriate knowledge set based on XP or current Streak
   const ITS_DATA = useMemo(() => {
-    if (experience >= 15 || scoreTillStreak >= 10) return ITS_ADVANCED_JSON;
+    if (experience >= 10 || scoreTillStreak >= 10) return ITS_ADVANCED_JSON;
     if (experience >= 5 || scoreTillStreak >= 5) return ITS_INTERMEDIATE_JSON;
     return ITS_BEGINNER_JSON;
   }, [experience, scoreTillStreak]);
@@ -40,15 +44,18 @@ export default function TutorialContainer({
   const safeCurrentLevel = Math.min(Math.max(currentLevel, 0), totalLevels - 1);
   const currentStep = ITS_DATA[safeCurrentLevel];
 
+  // Sync index to local storage for persistence
   useEffect(() => {
     localStorage.setItem("currentLevel", safeCurrentLevel.toString());
   }, [safeCurrentLevel]);
+
+  // --- Action Handlers ---
 
   const handleSubmit = () => {
     if (answer.trim().toLowerCase() === currentStep.answer.toLowerCase()) {
       setShowCorrectMessage(true);
       setShowIncorrectMessage(false);
-      setNumMistakes(0); 
+      setNumMistakes(0);
 
       const newExp = experience + 1;
       setExperience(newExp);
@@ -57,15 +64,15 @@ export default function TutorialContainer({
       setScoreTillStreak((prev) => prev + 1);
     } else {
       setShowCorrectMessage(false);
-
       const nextMistakeCount = numMistakes + 1;
 
+      // TWO-MISTAKE DEMOTION: Revisit prerequisite concepts if student struggles
       if (nextMistakeCount >= 2) {
         setScoreTillStreak(0);
         setShowIncorrectMessage(false);
         setNumMistakes(0);
         setExperience(0);
-        setCurrentLevel(0); 
+        setCurrentLevel(0);
         localStorage.setItem("experience", "0");
         localStorage.setItem("currentLevel", "0");
       } else {
@@ -83,18 +90,56 @@ export default function TutorialContainer({
     setShowIncorrectMessage(false);
     setAnswer("");
 
+    // Progression: Level up if streak threshold is met
     if (scoreTillStreak >= streakThreshold) {
-      setCurrentLevel(0);
+      if (ITS_DATA === ITS_ADVANCED_JSON) {
+        setIsFinished(true); // Signal completion of Expert level
+      } else {
+        setCurrentLevel(0);
+        setScoreTillStreak(0); // Reset streak for the next module
+      }
     }
+    // Normal linear progression
     else if (safeCurrentLevel < totalLevels - 1) {
       setCurrentLevel(safeCurrentLevel + 1);
     }
+    // Fallback: Loop back if end reached without mastery
     else {
       const randomIndex = Math.floor(Math.random() * totalLevels);
       setCurrentLevel(randomIndex);
       setScoreTillStreak(0);
     }
   };
+
+  // --- Final Mastery View ---
+  if (isFinished) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center text-center p-6 bg-gradient-to-b from-white to-sky-50 animate-in fade-in duration-700">
+        <h2 className="text-2xl font-bold text-sky-900 mb-2">
+          🎓 Curriculum Mastered!
+        </h2>
+        <p className="text-gray-600 mb-8">
+          Congratulations! You've successfully navigated the component hierarchy
+          and mastered the flow of props.
+        </p>
+        <div className="bg-white p-6 rounded-2xl shadow-xl border border-sky-100 w-full mb-8">
+          <p className="text-xs uppercase tracking-widest text-sky-500 font-bold mb-1">
+            Final Mastery Points
+          </p>
+          <p className="text-4xl font-black text-black">{experience} XP</p>
+        </div>
+        <button
+          onClick={() => {
+            localStorage.clear();
+            window.location.reload();
+          }}
+          className="w-full py-4 hover:cursor-pointer bg-sky-600 text-white font-bold rounded-xl hover:bg-sky-700 transition-all shadow-lg active:scale-95 -mt-5"
+        >
+          Restart Tutorial
+        </button>
+      </div>
+    );
+  }
 
   if (!currentStep) {
     return (
@@ -104,16 +149,18 @@ export default function TutorialContainer({
     );
   }
 
+  // --- Standard Tutorial View ---
   return (
     <div className="h-full overflow-y-auto text-gray-500 p-4 bg-white shadow-xl">
+      {/* Header with Mastery Metadata */}
       <div className="p-1 w-full flex justify-between items-start mb-6 border-b border-gray-100 pb-4">
         <div>
           <h3 className="text-lg font-bold text-sky-800 leading-tight">
             Level:{" "}
             <span className="text-black capitalize">
-              {experience >= 15
+              {experience >= 10 || scoreTillStreak >= 10
                 ? "Expert"
-                : experience >= 5
+                : experience >= 5 || scoreTillStreak >= 5
                   ? "Intermediate"
                   : "Beginner"}
             </span>
@@ -125,7 +172,8 @@ export default function TutorialContainer({
                 scoreTillStreak > 0 ? "text-orange-500" : "text-gray-400"
               }
             >
-              Streak: {scoreTillStreak}/{streakThreshold}
+              Streak: {Math.min(scoreTillStreak, streakThreshold)}/
+              {streakThreshold}
             </span>
             {numMistakes > 0 && (
               <span className="text-red-500">Mistakes: {numMistakes}/2</span>
@@ -140,7 +188,7 @@ export default function TutorialContainer({
         </button>
       </div>
 
-      {/* Tutorial Question Section */}
+      {/* Main Instruction Area */}
       <div className="w-full">
         <p className="text-black text-base leading-relaxed mb-8">
           {currentStep.text}
@@ -157,7 +205,7 @@ export default function TutorialContainer({
                   onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                   onChange={(e) => setAnswer(e.target.value)}
                   className="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all"
-                  placeholder="Type your answer..."
+                  placeholder="Type your answer here..."
                 />
                 <button
                   onClick={handleSubmit}
@@ -188,9 +236,7 @@ export default function TutorialContainer({
             {showIncorrectMessage && !showCorrectMessage && (
               <div className="mt-6 p-5 bg-red-50 border-l-8 border-red-500 rounded-r-xl animate-in shake duration-300">
                 <p className="text-red-800 text-md">
-                  <span className="font-bold block mb-1">
-                    Not quite!
-                  </span>
+                  <span className="font-bold block mb-1">Not quite!</span>
                   {currentStep.incorrectMessage}
                 </p>
               </div>
